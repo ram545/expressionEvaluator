@@ -14,72 +14,91 @@
 using namespace std;
 
 template <typename T>
-class Stack{
-    private:
-        int capacity;
-        T *arr;
-        int top;
-    public:
-        Stack(int len=cap){
-            arr = new T[len+1];
-            top = -1;
-            capacity = len;
-        }
-        ~Stack(){
-            delete[] arr;
-            top=0;
-            capacity=0;
-        }
+class Stack
+{
+private:
+    int capacity;
+    T *arr;
+    int top;
+public:
+    Stack(int len=cap)
+    {
+        arr = new T[len+1];
+        top = -1;
+        capacity = len;
+    }
+    ~Stack()
+    {
+        delete[] arr;
+        top=0;
+        capacity=0;
+    }
 
-        void push(T c){
-            if(isFull())
-                cout << "Stack is Full" << endl;
-            else
-                arr[++top]=c;
-        }
+    void push(T c)
+    {
+        if(isFull())
+            cout << "Stack is Full" << endl;
+        else
+            arr[++top]=c;
+    }
 
-        T pop(){
-            if(isEmpty()){
-                cout << "Stack is empty" << endl;
-                return NULL;
-            }
-            else
-                return arr[top--];
+    T pop()
+    {
+        T var;
+        if(isEmpty())
+        {
+            cout << "Stack is empty" << endl;
+            return var;
         }
+        else
+            return arr[top--];
+    }
 
-        T peek(){
-            if(isEmpty()){
-                cout << "Stack is empty" << endl;
-                return NULL;
-            }
-            else
-                return arr[top];
+    T peek()
+    {
+        T var;
+        if(isEmpty())
+        {
+            cout << "Stack is empty" << endl;
+            return var;
         }
+        else
+            return arr[top];
+    }
 
-        bool isEmpty(){
-            return top==-1;
-        }
+    bool isEmpty()
+    {
+        return top==-1;
+    }
 
-        bool isFull(){
-            return top==capacity-1;
-        }
+    bool isFull()
+    {
+        return top==capacity-1;
+    }
 };
 
-struct node{
+struct node
+{
     string data;
     node *right;
     node *left;
-    void setValue(string val){
+    void setValue(string val)
+    {
         data=val;
         right=NULL;
         left=NULL;
     }
-    bool isLeaf(node val){
-        if(val.right==NULL && val.left==NULL)
+    bool isLeaf()
+    {
+        if(right==NULL && left==NULL)
             return 1;
         return 0;
     }
 };
+
+
+
+
 
 
 

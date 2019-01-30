@@ -29,13 +29,22 @@
 *           push operator in operator stack
 * 8) until operator stack is empty
 *               pop one operator,two operators and push result into operand stack
-* 9) Finally, operand stack has one value and operator stack is emptys
+* 9) Finally, operand stack has one value and operator stack is empty
+*
+*                                  (OR)
+*
+* 1) Built an expression tree using the above logic(In Parser Function)
+* 2) Evaluate the expression tree
+* 3) if the node is leaf then return value
+* 4) else eval node->left,node->right then return the value.
 * ...
 **********************************************************************/
 #include ".\stack.cpp"
 #include <cstdlib>
 
-int precedence(char a){
+//To determine Precedence
+int precedence(char a)
+{
     if(a=='*' || a=='/')
         return 2;
     else if(a=='+' || a=='-')
@@ -43,16 +52,20 @@ int precedence(char a){
     return 0;
 }
 
-int result(int a,int b,char c){
+//To calculate values
+int result(int a,int b,char c)
+{
     if(c=='*')
         return a*b;
-    else if(c=='/'){
-        if(b==0){
+    else if(c=='/')
+    {
+        if(b==0)
+        {
             cout << "Division by zero not permitted" << endl;
             _Exit(1);
         }
         else
-        return a/b;
+            return a/b;
     }
     else if(c=='+')
         return a+b;
@@ -60,15 +73,20 @@ int result(int a,int b,char c){
         return a-b;
 }
 
-int evaluator(string exp){
+//Evaluate expression using two stacks
+int evaluator(string exp)
+{
     Stack<int> s1(200);
     Stack<char> s(100);
     int op1,op2,len=exp.length(),i,temp,temp1;
     char op;
-    for(i=0;i<len;i++){
+    for(i=0; i<len; i++)
+    {
         temp=0;
-        if(exp[i]>='0' && exp[i]<='9'){
-            while(i<len && (exp[i]>='0' && exp[i]<='9')){
+        if(exp[i]>='0' && exp[i]<='9')
+        {
+            while(i<len && (exp[i]>='0' && exp[i]<='9'))
+            {
                 temp1=exp[i]-'0';
                 i++;
                 temp = temp*10+temp1;
@@ -76,11 +94,14 @@ int evaluator(string exp){
             s1.push(temp);
             i--;
         }
-        else{
+        else
+        {
             if(exp[i]=='(')
                 s.push(exp[i]);
-            else if(exp[i]==')'){
-                while(s.peek()!='('){
+            else if(exp[i]==')')
+            {
+                while(s.peek()!='(')
+                {
                     op1 = s1.pop();
                     op2 = s1.pop();
                     op = s.pop();
@@ -89,14 +110,18 @@ int evaluator(string exp){
                 }
                 s.pop();
             }
-            else{
-                if(exp[i]=='-' || exp[i]=='+'){
-                    if(i==0 || (exp[i-1]<'0' || exp[i-1]>'9')){
+            else
+            {
+                if(exp[i]=='-' || exp[i]=='+')
+                {
+                    if(i==0 || (exp[i-1]<'0' || exp[i-1]>'9'))
+                    {
                         if(exp[i-1]!=')')
                             s1.push(0);
                     }
                 }
-                while(!(s.isEmpty()) && (precedence(exp[i])<=precedence(s.peek()))){
+                while(!(s.isEmpty()) && (precedence(exp[i])<=precedence(s.peek())))
+                {
                     op1 = s1.pop();
                     op2 = s1.pop();
                     op = s.pop();
@@ -107,7 +132,8 @@ int evaluator(string exp){
             }
         }
     }
-    while(!s.isEmpty()){
+    while(!s.isEmpty())
+    {
         op1 = s1.pop();
         op2 = s1.pop();
         op = s.pop();
@@ -117,79 +143,125 @@ int evaluator(string exp){
     return s1.peek();
 }
 
-int Parser(string exp){
-    Stack<node> s1(200);
+//convert string to int
+int conStrToInt(string s){
+    int tem,tem1=0;
+    for(int i=0;i<s.length();i++){
+        tem=s[i]-'0';
+        tem1 = tem1*10+tem;
+    }
+    return tem1;
+}
+
+//evaluate expression tree
+int TreeEval(node* s){
+    int left,right;
+    char c;
+    if(s->isLeaf())
+        return conStrToInt(s->data);
+    else{
+        c = s->data[0];
+        left = TreeEval(s->left);
+        right = TreeEval(s->right);
+        return result(left,right,c);
+    }
+}
+
+//Building expression tree using two stacks
+int Parser(string exp)
+{
+    Stack<node *> s1(200);
     Stack<char> s(100);
     int len=exp.length(),i,temp;
-    node oper,op1,op2,opr;
+    string tem;
+    node *op1,*op2;
     char op;
-    for(i=0;i<len;i++){
-        if(exp[i]>='0' && exp[i]<='9'){
+    for(i=0; i<len; i++)
+    {
+        if(exp[i]>='0' && exp[i]<='9')
+        {
             temp=i;
             while(temp<len && (exp[temp]>='0' && exp[temp]<='9'))
                 temp++;
-            opr = new node[];
-            opr.setValue(exp.substr(i,temp-i));
+            node *opr=new node();
+            opr->setValue(exp.substr(i,temp-i));
             s1.push(opr);
             i=temp-1;
         }
-        else{
+        else
+        {
             if(exp[i]=='(')
                 s.push(exp[i]);
-            else if(exp[i]==')'){
-                while(s.peek()!='('){
+            else if(exp[i]==')')
+            {
+                while(s.peek()!='(')
+                {
                     op1 = s1.pop();
                     op2 = s1.pop();
                     op = s.pop();
-                    oper = new node();
-                    oper.setValue(op);
-                    oper.right=op1;
-                    oper.left=op2;
+                    node *oper = new node();
+                    tem = op;
+                    oper->setValue(tem);
+                    oper->right=op1;
+                    oper->left=op2;
                     s1.push(oper);
                 }
                 s.pop();
             }
-            else{
-                if(exp[i]=='-' || exp[i]=='+'){
-                    if(i==0 || (exp[i-1]<'0' || exp[i-1]>'9')){
-                        if(exp[i-1]!=')'){
-                            opr=new node();
-                            opr.setValue("0");
+            else
+            {
+                if(exp[i]=='-' || exp[i]=='+')
+                {
+                    if(i==0 || (exp[i-1]<'0' || exp[i-1]>'9'))
+                    {
+                        if(exp[i-1]!=')')
+                        {
+                            node *opr=new node();
+                            opr->setValue("0");
+                            s1.push(opr);
                         }
                     }
                 }
-                while(!(s.isEmpty()) && (precedence(exp[i])<=precedence(s.peek()))){
+                while(!(s.isEmpty()) && (precedence(exp[i])<=precedence(s.peek())))
+                {
                     op1 = s1.pop();
                     op2 = s1.pop();
                     op = s.pop();
-                    oper = new node();
-                    oper.setValue(op);
-                    oper.right=op1;
-                    oper.left=op2;
+                    tem=op;
+                    node *oper = new node();
+                    oper->setValue(tem);
+                    oper->right=op1;
+                    oper->left=op2;
                     s1.push(oper);
                 }
                 s.push(exp[i]);
             }
         }
     }
-    while(!s.isEmpty()){
+    while(!s.isEmpty())
+    {
         op1 = s1.pop();
         op2 = s1.pop();
         op = s.pop();
-        oper = new node();
-        oper.setValue(op);
-        oper.right=op1;
-        oper.left=op2;
+        node *oper=new node();
+        tem = op;
+        oper->setValue(tem);
+        oper->right=op1;
+        oper->left=op2;
         s1.push(oper);
     }
-    return s1.peek();
+    return TreeEval(s1.peek());
 }
-int main(){
+
+int main()
+{
     int value;
     string expression;
     cin >> expression;
     value = evaluator(expression);
-    cout << value << endl;
+    cout << "Without Using Expression Tree" << value << endl;
+    value = Parser(expression);
+    cout << "Using Expression Tree" << value << endl;
     return 0;
 }
 
